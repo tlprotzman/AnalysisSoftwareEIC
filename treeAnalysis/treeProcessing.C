@@ -567,6 +567,14 @@ void treeProcessing(
             std::vector<float> jetf_truthcharged_py;
             std::vector<float> jetf_truthcharged_pz;
             std::vector<float> jetf_truthcharged_E;
+            std::vector<float> jetf_truth_emcal_px;
+            std::vector<float> jetf_truth_emcal_py;
+            std::vector<float> jetf_truth_emcal_pz;
+            std::vector<float> jetf_truth_emcal_E;
+            std::vector<float> jetf_truth_hcal_px;
+            std::vector<float> jetf_truth_hcal_py;
+            std::vector<float> jetf_truth_hcal_pz;
+            std::vector<float> jetf_truth_hcal_E;
             for(Int_t imc=0; imc<_nMCPart; imc++){
                 TVector3 truevec(_mcpart_px[imc],_mcpart_py[imc],_mcpart_pz[imc]);
 //                 if(truevec.Eta()<1){
@@ -584,6 +592,18 @@ void treeProcessing(
                     jetf_truthcharged_py.push_back(_mcpart_py[imc]);
                     jetf_truthcharged_pz.push_back(_mcpart_pz[imc]);
                     jetf_truthcharged_E.push_back(_mcpart_E[imc]);
+                }
+                if (abs(_mcpart_PDG[imc]) == 11 || abs(_mcpart_PDG[imc]) == 22 || abs(_mcpart_PDG[imc]) == 111) {
+                    jetf_truth_emcal_px.push_back(_mcpart_px[imc]);
+                    jetf_truth_emcal_py.push_back(_mcpart_py[imc]);
+                    jetf_truth_emcal_pz.push_back(_mcpart_pz[imc]);
+                    jetf_truth_emcal_E.push_back(_mcpart_E[imc]);
+                }
+                if (abs(_mcpart_PDG[imc]) >= 12 && abs(_mcpart_PDG[imc]) <= 18) { 
+                    jetf_truth_hcal_px.push_back(_mcpart_px[imc]);
+                    jetf_truth_hcal_py.push_back(_mcpart_py[imc]);
+                    jetf_truth_hcal_pz.push_back(_mcpart_pz[imc]);
+                    jetf_truth_hcal_E.push_back(_mcpart_E[imc]);
                 }
             }
 
