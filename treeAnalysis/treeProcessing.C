@@ -583,6 +583,10 @@ void treeProcessing(
             std::vector<float> jetf_truth_hcal_py;
             std::vector<float> jetf_truth_hcal_pz;
             std::vector<float> jetf_truth_hcal_E;
+            std::vector<float> jetf_truth_cal_px;
+            std::vector<float> jetf_truth_cal_py;
+            std::vector<float> jetf_truth_cal_pz;
+            std::vector<float> jetf_truth_cal_E;
             for(Int_t imc=0; imc<_nMCPart; imc++){
                 TVector3 truevec(_mcpart_px[imc],_mcpart_py[imc],_mcpart_pz[imc]);
 //                 if(truevec.Eta()<1){
@@ -600,18 +604,26 @@ void treeProcessing(
                     jetf_truthcharged_py.push_back(_mcpart_py[imc]);
                     jetf_truthcharged_pz.push_back(_mcpart_pz[imc]);
                     jetf_truthcharged_E.push_back(_mcpart_E[imc]);
-                }
-                if (abs(_mcpart_PDG[imc]) == 11 || abs(_mcpart_PDG[imc]) == 22 || abs(_mcpart_PDG[imc]) == 111) {
                     jetf_truth_emcal_px.push_back(_mcpart_px[imc]);
                     jetf_truth_emcal_py.push_back(_mcpart_py[imc]);
                     jetf_truth_emcal_pz.push_back(_mcpart_pz[imc]);
                     jetf_truth_emcal_E.push_back(_mcpart_E[imc]);
+                    jetf_truth_cal_px.push_back(_mcpart_px[imc]);
+                    jetf_truth_cal_py.push_back(_mcpart_py[imc]);
+                    jetf_truth_cal_pz.push_back(_mcpart_pz[imc]);
+                    jetf_truth_cal_E.push_back(_mcpart_E[imc]);
                 }
-                if (abs(_mcpart_PDG[imc]) >= 12 && abs(_mcpart_PDG[imc]) <= 18) { 
+                if (abs(_mcpart_PDG[imc]) == 11 || abs(_mcpart_PDG[imc]) == 22 || abs(_mcpart_PDG[imc]) == 211) {
+                }
+                if (abs(_mcpart_PDG[imc]) >= 12 && abs(_mcpart_PDG[imc]) <= 25) { 
                     jetf_truth_hcal_px.push_back(_mcpart_px[imc]);
                     jetf_truth_hcal_py.push_back(_mcpart_py[imc]);
                     jetf_truth_hcal_pz.push_back(_mcpart_pz[imc]);
                     jetf_truth_hcal_E.push_back(_mcpart_E[imc]);
+                    jetf_truth_cal_px.push_back(_mcpart_px[imc]);
+                    jetf_truth_cal_py.push_back(_mcpart_py[imc]);
+                    jetf_truth_cal_pz.push_back(_mcpart_pz[imc]);
+                    jetf_truth_cal_E.push_back(_mcpart_E[imc]);
                 }
             }
 
@@ -640,8 +652,21 @@ void treeProcessing(
             auto jetsTrue = findJets(jetR, jetAlgorithm, jetf_truth_px, jetf_truth_py, jetf_truth_pz, jetf_truth_E);
             if(verbosity>1) std::cout << "found " << std::get<1>(jetsTrue).size() << " true jets" << std::endl;        // printJets(std::get<1>(jetsTrue));
 
+            // truth charged (track) jets
             auto jetsTrueCharged = findJets(jetR, jetAlgorithm, jetf_truthcharged_px, jetf_truthcharged_py, jetf_truthcharged_pz, jetf_truthcharged_E);
             if(verbosity>1) std::cout << "found " << std::get<1>(jetsTrueCharged).size() << " true charged jets" << std::endl;        // printJets(std::get<1>(jetsTrue));
+
+            // EMCal Truth Jets
+            auto jetsTrueEmcal = findJets(jetR, jetAlgorithm, jetf_truth_emcal_px, jetf_truth_emcal_py, jetf_truth_emcal_pz, jetf_truth_emcal_E);
+            if (verbosity > 1) std::cout << "found " << std::get<1>(jetsTrueEmcal).size() << " true emcal jets" << std::endl;
+
+            // HCal jets
+            auto jetsTrueHcal = findJets(jetR, jetAlgorithm, jetf_truth_hcal_px, jetf_truth_hcal_py, jetf_truth_hcal_pz, jetf_truth_hcal_E);
+            if (verbosity > 1) std::cout << "found " << std::get<1>(jetsTrueHcal).size() << " true hcal jets" << std::endl;
+
+            // All Calo jets
+            auto jetsTrueCalo = findJets(jetR, jetAlgorithm, jetf_truth_cal_px, jetf_truth_cal_py, jetf_truth_cal_pz, jetf_truth_cal_E);
+            if (verbosity > 1) std::cout << "found " << std::get<1>(jetsTrueCalo).size() << " true calo jets" << std::endl;
 
             // track-based jets (rec)
             auto jetsTrackRec = findJets(jetR, jetAlgorithm, jetf_track_px, jetf_track_py, jetf_track_pz, jetf_track_E);
@@ -681,11 +706,11 @@ void treeProcessing(
 
             jetresolutionhistos(jetsTrackRec,jetsTrueCharged,0);
             jetresolutionhistos(jetsFullRec,jetsTrue,1);
-            jetresolutionhistos(jetsHcalRec,jetsTrue,2);
-            jetresolutionhistos(jetsCaloRec,jetsTrue,3);
+            jetresolutionhistos(jetsHcalRec, jetsTrueHcal,2);
+            jetresolutionhistos(jetsCaloRec,jetsTrueCalo,3);
             jetresolutionhistos(jetsAllRec,jetsTrue,4);
             jetresolutionhistos(jetsNoCluster, jetsTrue, 5);
-            jetresolutionhistos(jetsEmcalRec, jetsTrue, 6);
+            jetresolutionhistos(jetsEmcalRec, jetsTrueEmcal, 6);
             
 // TString jettype[njettypes] = {"track", "full","hcal","calo","all"};
         }
