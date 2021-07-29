@@ -26,25 +26,12 @@ TH2F* h_jetscale_phi[njettypes][nEta+1] = {NULL};
 TH2F* h_constituents_Eta[njettypes] = {NULL};
 TH2F* h_constituents_true_Eta[njettypes] = {NULL};
 
-TH1D *h_JES_pT[njettypes][nEta+1] = {NULL};
-TH1D *h_JER_pT[njettypes][nEta+1] = {NULL};
-TH1D *h_JES_E[njettypes][nEta+1] = {NULL};
-TH1D *h_JER_E[njettypes][nEta+1] = {NULL};
-
 TH2F* h2D_jet_EtaReso_E[njettypes][nEta+1] = {NULL};
-TH1D *h_EtaReso_Mean_E[njettypes][nEta+1] = {NULL};
-TH1D *h_EtaReso_Width_E[njettypes][nEta+1] = {NULL};
 TH2F* h2D_jet_EtaReso_Eta[njettypes] = {NULL};
-TH1D *h_EtaReso_Mean_Eta[njettypes] = {NULL};
-TH1D *h_EtaReso_Width_Eta[njettypes] = {NULL};
 
 // Study the scale and resolution in phi
 TH2F* h2D_jet_PhiReso_E[njettypes][nEta+1] = {NULL};
-TH1D *h_PhiReso_Mean_E[njettypes][nEta+1] = {NULL};
-TH1D *h_PhiReso_Width_E[njettypes][nEta+1] = {NULL};
 TH2F* h2D_jet_PhiReso_Eta[njettypes] = {NULL};
-TH1D *h_PhiReso_Mean_Eta[njettypes] = {NULL};
-TH1D *h_PhiReso_Width_Eta[njettypes] = {NULL};
 
 // Plot the jet spectra in eta, phi, E, pT
 TH2F *h2D_truth_reco_eta[njettypes] = {NULL};
@@ -83,12 +70,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     
 
     if(!h2D_jet_EtaReso_Eta[isel])h2D_jet_EtaReso_Eta[isel]  = new TH2F(Form("h2D_jet_EtaReso_%s_Eta",jettype[isel].Data()),"",40,0,4,200,-1,1);
-    if(!h_EtaReso_Mean_Eta[isel])h_EtaReso_Mean_Eta[isel]    = new TH1D(Form("h_EtaReso_Mean_%s_Eta",jettype[isel].Data()),"",40,0,4);
-    if(!h_EtaReso_Width_Eta[isel])h_EtaReso_Width_Eta[isel]  = new TH1D(Form("h_EtaReso_Width_%s_Eta",jettype[isel].Data()),"",40,0,4);
-
     if(!h2D_jet_PhiReso_Eta[isel])h2D_jet_PhiReso_Eta[isel]  = new TH2F(Form("h2D_jet_PhiReso_%s_Eta",jettype[isel].Data()),"",40, 0, 4,200,-1,1);
-    if(!h_PhiReso_Mean_Eta[isel])h_PhiReso_Mean_Eta[isel]    = new TH1D(Form("h_PhiReso_Mean_%s_Eta",jettype[isel].Data()),"",40, 0, 4);
-    if(!h_PhiReso_Width_Eta[isel])h_PhiReso_Width_Eta[isel]  = new TH1D(Form("h_PhiReso_Width_%s_Eta",jettype[isel].Data()),"",40, 0, 4);
 
     if (!h2D_truth_reco_eta[isel]) h2D_truth_reco_eta[isel] = new TH2F(Form("h2D_truth_reco_eta_%s", jettype[isel].Data()), "", 40, -7, 7, 40, -7, 7);
     if (!h_truth_eta[isel]) h_truth_eta[isel] = new TH1F(Form("h_truth_eta_%s", jettype[isel].Data()), "", 40, -7, 7);
@@ -119,19 +101,8 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       if(!h_jetscale_eta[isel][eT])h_jetscale_eta[isel][eT]  = new TH2F(Form("h_jetscale_%s_eta_%d",jettype[isel].Data(), eT),"",40,0,200,200,-1,1);
       if(!h_jetscale_phi[isel][eT])h_jetscale_phi[isel][eT]  = new TH2F(Form("h_jetscale_%s_phi_%d",jettype[isel].Data(), eT),"",40,0,200,200,-1,1);
 
-      if(!h_JES_pT[isel][eT])h_JES_pT[isel][eT]         = new TH1D(Form("h_JES_%s_pT_%d",jettype[isel].Data(), eT),"",40,0,200);
-      if(!h_JER_pT[isel][eT])h_JER_pT[isel][eT]         = new TH1D(Form("h_JER_%s_pT_%d",jettype[isel].Data(), eT),"",40,0,200);
-      if(!h_JES_E[isel][eT])h_JES_E[isel][eT]           = new TH1D(Form("h_JES_%s_E_%d",jettype[isel].Data(), eT),"",40,0,200);
-      if(!h_JER_E[isel][eT])h_JER_E[isel][eT]           = new TH1D(Form("h_JER_%s_E_%d",jettype[isel].Data(), eT),"",40,0,200);
-
       if(!h2D_jet_EtaReso_E[isel][eT])h2D_jet_EtaReso_E[isel][eT]  = new TH2F(Form("h2D_jet_EtaReso_%s_E_%d",jettype[isel].Data(), eT),"",40,0,200,200,-1,1);
-      if(!h_EtaReso_Mean_E[isel][eT])h_EtaReso_Mean_E[isel][eT]    = new TH1D(Form("h_EtaReso_Mean_%s_E_%d",jettype[isel].Data(), eT),"",40,0,200);
-      if(!h_EtaReso_Width_E[isel][eT])h_EtaReso_Width_E[isel][eT]  = new TH1D(Form("h_EtaReso_Width_%s_E_%d",jettype[isel].Data(), eT),"",40,0,200);
-
       if(!h2D_jet_PhiReso_E[isel][eT])h2D_jet_PhiReso_E[isel][eT]  = new TH2F(Form("h2D_jet_PhiReso_%s_E_%d",jettype[isel].Data(), eT),"",40, 0, 200,200,-1,1);
-      if(!h_PhiReso_Mean_E[isel][eT])h_PhiReso_Mean_E[isel][eT]    = new TH1D(Form("h_PhiReso_Mean_%s_E_%d",jettype[isel].Data(), eT),"",40, 0, 200);
-      if(!h_PhiReso_Width_E[isel][eT])h_PhiReso_Width_E[isel][eT]  = new TH1D(Form("h_PhiReso_Width_%s_E_%d",jettype[isel].Data(), eT),"",40, 0, 200);
-
     }
   }
   int jets = 0;
@@ -232,26 +203,14 @@ void jetresolutionhistosSave(){
     if(h_MCjet_E_eta[isel])h_MCjet_E_eta[isel]->Write();
     if(h_jet_E_eta[isel])h_jet_E_eta[isel]->Write();
     if(h2D_jet_EtaReso_Eta[isel])h2D_jet_EtaReso_Eta[isel]->Write();
-    if(h_EtaReso_Mean_Eta[isel])h_EtaReso_Mean_Eta[isel]->Write();
-    if(h_EtaReso_Width_Eta[isel])h_EtaReso_Width_Eta[isel]->Write();
     if(h2D_jet_PhiReso_Eta[isel])h2D_jet_PhiReso_Eta[isel]->Write();
-    if(h_PhiReso_Mean_Eta[isel])h_PhiReso_Mean_Eta[isel]->Write();
-    if(h_PhiReso_Width_Eta[isel])h_PhiReso_Width_Eta[isel]->Write();
     for (Int_t eT = 0; eT < nEta+1; eT++){
       if(h_jetscale_E[isel][eT])h_jetscale_E[isel][eT]->Write();
       if(h_jetscale_pT[isel][eT])h_jetscale_pT[isel][eT]->Write();
       if(h_jetscale_eta[isel][eT])h_jetscale_eta[isel][eT]->Write();
       if(h_jetscale_phi[isel][eT])h_jetscale_phi[isel][eT]->Write();
-      if(h_JES_pT[isel][eT])h_JES_pT[isel][eT]->Write();
-      if(h_JES_E[isel][eT])h_JES_E[isel][eT]->Write();
-      if(h_JER_pT[isel][eT])h_JER_pT[isel][eT]->Write();
-      if(h_JER_E[isel][eT])h_JER_E[isel][eT]->Write();
       if(h2D_jet_EtaReso_E[isel][eT])h2D_jet_EtaReso_E[isel][eT]->Write();
-      if(h_EtaReso_Mean_E[isel][eT])h_EtaReso_Mean_E[isel][eT]->Write();
-      if(h_EtaReso_Width_E[isel][eT])h_EtaReso_Width_E[isel][eT]->Write();
       if(h2D_jet_PhiReso_E[isel][eT])h2D_jet_PhiReso_E[isel][eT]->Write();
-      if(h_PhiReso_Mean_E[isel][eT])h_PhiReso_Mean_E[isel][eT]->Write();
-      if(h_PhiReso_Width_E[isel][eT])h_PhiReso_Width_E[isel][eT]->Write();
     }
     if (h2D_truth_reco_eta[isel]) h2D_truth_reco_eta[isel]->Write();
     if (h_truth_eta[isel]) h_truth_eta[isel]->Write();
