@@ -15,7 +15,7 @@ Int_t verbosityJRH = 1;
 const int njettypes = 7;
 TString jettype[njettypes] = {"track", "full","hcal", "calo","all", "nocluster", "emcal"};
 
-const float min_eta[njettypes] = {-3.5, 0, 1.5, 1.5, 0, 1.5, 1.5};  // TODO Save this info as metadata...
+const float min_eta[njettypes] = {-3.5, 0, -3.5, -3.5, 0, -3.5, -3.5};  // TODO Save this info as metadata...
 const float max_eta[njettypes] = {3.5, 0, 3.5, 3.5, 0, 3.5, 3.5};
 
 TH2F* h_jet_E_eta[njettypes] = {NULL};
