@@ -192,6 +192,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     // std::cout << "jets: " << jets << " matched: " << matched << "\n";
 
   for (std::size_t i = 0; i < std::get<1>(recjets).size(); i++) {
+    float eta = std::get<1>(recjets)[i].eta();
     h2D_cluster_eta_phi[select]->Fill(std::get<1>(recjets)[i].eta(), std::get<1>(recjets)[i].phi());
     h2_reco_phi[select]->Fill(std::get<1>(recjets)[i].phi(), eta);
     h2_reco_eta[select]->Fill(eta, eta);
@@ -203,7 +204,6 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     h_constituents_Eta[select]->Fill(std::get<1>(recjets)[i].eta(),(std::get<1>(recjets)[i].constituents()).size());
 
     // Reco jet cuts
-    float eta = std::get<1>(recjets)[i].eta();
     if (eta < min_eta[select] || eta > max_eta[select]) {
       continue;
     }
