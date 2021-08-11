@@ -33,17 +33,18 @@ struct plottingStyleData
   int linestyle_jets[njettypes] = {1, 2, 2, 4, 8};//, 8, 9};
   TString str_jet_type[njettypes] = {"track", "calo", "hcal", "nocluster", "emcal"};
   TString str_jet_type_plot[njettypes] = {"Track Jets", "Calo Jets", "HCal Jets", "EMC No Cluster", "EMCal Jets"};
-  TString collisionSystem = "Pythia 6, ep 18x100, Q^{2}>100";
+  TString collisionSystem = "Pythia 6, ep 10x100";
   TString jetMatching = "anti-#it{k}_{T}, #it{R} = 0.5";
   TString format;
 };
 
-TString *cutString(int jettype) {return new TString(Form("%.1f < #eta < %.1f%s", min_eta[jettype], max_eta[jettype], jettype==0 ? ", pT < 30" : ""));}
+TString *cutString(int jettype) {return new TString(Form("z < 0.95%s", jettype==0 ? ", pT < 30" : ""));}
 void plotResoOrScale(TH1F *scaleData[nInputs][njettypes][nEta+eta_regions], TString title, TString outputDir, plottingStyleData style, float yMin, float yMax, TString xLabel, TString yLabel);
 void plotSpectra(TH3F *spectra[nInputs][njettypes], plottingStyleData style, TString title, TString outputFormat, TH2F *reco[nInputs][njettypes]=nullptr, TH2F *truth[nInputs][njettypes]=nullptr, float textX=0.22, float textY=0.83);
 void plotEfficiency(TH1F *h_matched_count[nInputs][njettypes], TH1F *h_truth_count[nInputs][njettypes], plottingStyleData style, TString outputDir);
 void plotSlices (TH2F *spectra[nInputs][njettypes][nEta+eta_regions], plottingStyleData style, TString title, TString outputFormat, TString xLabel, TString symbol, TString units);
 void drawInfo(plottingStyleData style, float x, float y, int jettype, int numExtraLines=0, TString *extraLines=nullptr);
+void plotZ(TH1F *h_jet_z, TString label);
 
 
 void resolutionJETStree(
@@ -51,8 +52,9 @@ void resolutionJETStree(
     bool make_resolution_plots  = true,
     bool do_plot_scale          = true,
     bool make_spectra_plots     = true,
-    bool make_efficiency_plots  = true,
-    bool make_slice_plots       = true
+    bool make_efficiency_plots  = false,
+    bool make_slice_plots       = false,
+    bool make_jet_z_plots       = true
 ){
 
   gROOT->Reset();
@@ -152,6 +154,10 @@ void resolutionJETStree(
   TH1F *h_truth_count[nInputs][njettypes] = {NULL};
   TH1F *h_matched_count[nInputs][njettypes] = {NULL};
 
+  
+  TH1F *h_jet_z_true[nInputs][njettypes] = {{NULL}};
+  TH1F *h_jet_z_reco[nInputs][njettypes] = {{NULL}};
+
   TH1 *a = new TH1F();
 
   // Load required histograms
@@ -189,6 +195,9 @@ void resolutionJETStree(
         h3D_truth_reco_p[iInp][ijr] = (TH3F*)inputFiles[iInp]->Get(Form("h3D_truth_reco_p_%s", style.str_jet_type[ijr].Data()));
         h2_truth_p[iInp][ijr] = (TH2F*)inputFiles[iInp]->Get(Form("h2_truth_p_%s", style.str_jet_type[ijr].Data()));
         h2_reco_p[iInp][ijr] = (TH2F*)inputFiles[iInp]->Get(Form("h2_reco_p_%s", style.str_jet_type[ijr].Data()));
+
+        h_jet_z_true[iInp][ijr] = (TH1F*)inputFiles[iInp]->Get(Form("h_jet_z_true_%s", style.str_jet_type[ijr].Data()));
+        h_jet_z_reco[iInp][ijr] = (TH1F*)inputFiles[iInp]->Get(Form("h_jet_z_reco_%s", style.str_jet_type[ijr].Data()));
 
       for (Int_t eT = 0; eT < nEta; eT++){
         histo2D_JES_E[iInp][ijr][eT]	= (TH2F*) inputFiles[iInp]->Get(Form("h_jetscale_%s_E_%d", style.str_jet_type[ijr].Data(),eT));
@@ -340,7 +349,7 @@ void resolutionJETStree(
   if (do_plot_scale) {
     plotResoOrScale(histo_JES_E, TString("E Scale"), TString(Form("%s/JetEnergyScale/JES", outputDir.Data())), style, -1, 0.4, TString("#it{E}^{jet}"), TString("Mean((#it{E}^{rec} - #it{E}^{true}) / #it{E}^{true}))"));  // Plot jet energy scale
     plotResoOrScale(histo_JES_pT, TString("pT Scale"), TString(Form("%s/JetMomentumScale/pTScale", outputDir.Data())), style, -0.6, 0.4, TString("pT^{jet}"), TString("Mean((pT^{rec} - pT^{true}) / pT^{true}))"));  // Plot jet energy scale
-    plotResoOrScale(histo_JES_p, TString("p Scale"), TString(Form("%s/JetMomentumScale/pScale", outputDir.Data())), style, -0.8, 0.4, TString("p^{jet}"), TString("#LT(p^{rec} - p^{true}) / p^{true}#GT"));  // Plot jet energy scale
+    plotResoOrScale(histo_JES_p, TString("p Scale"), TString(Form("%s/JetMomentumScale/pScale", outputDir.Data())), style, -0.2, 0.2, TString("p^{jet}"), TString("#LT(p^{rec} - p^{true}) / p^{true}#GT"));  // Plot jet energy scale
     plotResoOrScale(h_EtaReso_Mean_E, TString("#eta Scale"), TString(Form("%s/EtaScale/EtaScale", outputDir.Data())), style, -0.4, 0.4, TString("#it{E}^{jet}"), TString("Mean((#eta^{rec} - #eta^{true}))"));  // Plot jet eta scale
     plotResoOrScale(h_PhiReso_Mean_E, TString("#Phi Scale"), TString(Form("%s/PhiScale/PhiScale", outputDir.Data())), style, -0.4, 0.4, TString("#it{E}^{jet}"), TString("Mean((#Phi^{rec} - #Phi^{true}))"));  // Plot jet phi scale
 }
@@ -349,9 +358,9 @@ void resolutionJETStree(
   if (make_resolution_plots) {
     plotResoOrScale(histo_JER_E, TString("E Resolution"), TString(Form("%s/JetEnergyResolution/JER_E", outputDir.Data())), style, 0, 0.6, TString("#it{E}^{jet}"), TString("#sigma((#it{E}^{rec} - #it{E}^{true}) / #it{E}^{true})"));
     plotResoOrScale(histo_JER_pT, TString("pT Resolution"), TString(Form("%s/JetMomentumResolution/pTReso", outputDir.Data())), style, 0, 0.6, TString("pT^{jet}"), TString("#sigma((pT^{rec} - pT^{true}) / pT^{true})"));
-    plotResoOrScale(histo_JER_p, TString("p Resolution"), TString(Form("%s/JetMomentumResolution/pReso", outputDir.Data())), style, 0, 0.6, TString("p^{jet}"), TString("#sigma((p^{rec} - p^{true}) / p^{true})"));
-    plotResoOrScale(h_EtaReso_Width_E, TString("#eta Resolution"), TString(Form("%s/EtaResolution/EtaReso", outputDir.Data())), style, 0, 0.4, TString("#it{E}^{jet}"), TString("#sigma((#eta^{rec} - #eta^{true}))"));
-    plotResoOrScale(h_PhiReso_Width_E, TString("#Phi Resolution"), TString(Form("%s/PhiResolution/PhiReso", outputDir.Data())), style, 0, 0.4, TString("#it{E}^{jet}"), TString("#sigma((#Phi^{rec} - #Phi^{true}))"));
+    plotResoOrScale(histo_JER_p, TString("p Resolution"), TString(Form("%s/JetMomentumResolution/pReso", outputDir.Data())), style, 0, 0.3, TString("p^{jet}"), TString("#sigma((p^{rec} - p^{true}) / p^{true})"));
+    plotResoOrScale(h_EtaReso_Width_E, TString("#eta Resolution"), TString(Form("%s/EtaResolution/EtaReso", outputDir.Data())), style, 0, 0.15, TString("#it{E}^{jet}"), TString("#sigma((#eta^{rec} - #eta^{true}))"));
+    plotResoOrScale(h_PhiReso_Width_E, TString("#Phi Resolution"), TString(Form("%s/PhiResolution/PhiReso", outputDir.Data())), style, 0, 0.15, TString("#it{E}^{jet}"), TString("#sigma((#Phi^{rec} - #Phi^{true}))"));
   }
 
   // Plot spectra
@@ -375,6 +384,11 @@ void resolutionJETStree(
   // Plot efficiency
   if (make_efficiency_plots) {
     plotEfficiency(h_matched_count, h_truth_count, style, outputDir);
+  }
+
+  if (make_jet_z_plots) {
+    plotZ(h_jet_z_true[0][0], Form("Tracked_Truth"));
+    plotZ(h_jet_z_reco[0][0], Form("Tracked_Reco"));
   }
 }
 
@@ -691,4 +705,15 @@ void drawInfo(plottingStyleData style, float x, float y, int jettype, int numExt
   for (std::size_t i = 0; i < numExtraLines; i++) {
     drawLatexAdd(extraLines[i].Data(), x, y - (0.15 + i * 0.05), textSizeLabelsRel, false, false, false);
   }
+}
+
+void plotZ(TH1F *h_jet_z, TString label) {
+  TCanvas *canvas = new TCanvas();
+  h_jet_z->Draw();
+  // h_jet_z->SetTitle(label.Data());
+  h_jet_z->SetXTitle("z=p_{track}/p_{jet}");
+  h_jet_z->SetYTitle("Counts");
+  h_jet_z->SetLineWidth(2);
+  canvas->Print(Form("%s.png", label.Data()));   // TODO Standardize this with format of other functions
+  
 }

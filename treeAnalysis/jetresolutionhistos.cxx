@@ -237,11 +237,11 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
           continue;
         }
       }
-      
-      jet_z = jetZ(std::get<1>(truejets)[j]);   // Skip jets made mostly of a single constituent
-      if (jet_z > 0.95) {
-        continue;
-      }
+
+      // jet_z = jetZ(std::get<1>(truejets)[j]);   // Skip jets made mostly of a single constituent
+      // if (jet_z > 0.95) {
+      //   continue;
+      // }
       
       Double_t deltaRTrueRec = std::get<1>(truejets)[j].delta_R(std::get<1>(recjets)[i]);
       // cout << deltaRTrueRec << endl;
@@ -289,11 +289,11 @@ float jetZ(fastjet::PseudoJet jet) {
     return -1;
   }
   std::vector<fastjet::PseudoJet> constituents = jet.constituents();
-  float jet_E = jet.E();
+  float jet_E = jet.modp();
   float max_constituent_E = -1;
   for (std::vector<fastjet::PseudoJet>::iterator it = constituents.begin(); it != constituents.end(); it++) {
     if (it->E() > max_constituent_E) {
-      max_constituent_E = it->E();
+      max_constituent_E = it->modp();
     }
   }
   return max_constituent_E / jet_E;
