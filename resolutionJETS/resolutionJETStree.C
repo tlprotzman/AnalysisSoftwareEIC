@@ -486,9 +486,9 @@ void plotSpectra(TH3F *spectra[nInputs][njettypes], plottingStyleData style, TSt
       TH2F *projection = (TH2F*)spectra[0][i]->Project3D("yx");
       SetStyleHistoTH2ForGraphs(projection, Form("truth %s", title.Data()), Form("reco %s", title.Data()), 0.85*textSizeSinglePad,textSizeSinglePad, 0.85*textSizeSinglePad,textSizeSinglePad, 0.9,0.91, 2);
       projection->Draw("colz");
-      projection->GetXaxis()->SetRangeUser(0, 80);
+      // projection->GetXaxis()->SetRangeUser(0, 80);
       projection->GetXaxis()->SetNdivisions();
-      projection->GetYaxis()->SetRangeUser(0, 80);
+      // projection->GetYaxis()->SetRangeUser(0, 80);
       if (j) {
         TString *eta_range = new TString(Form("%.1f < #eta < %.1f", eta_start[j], eta_end[j]));
         drawInfo(style, textX, textY, i, 1, eta_range);
