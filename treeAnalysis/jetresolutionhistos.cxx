@@ -221,7 +221,8 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     }
     float jet_z = jetZ(std::get<1>(recjets)[i]);
     if (jet_z > 0.95) {
-      continue;
+      std::cout << "jet_z cut" << std::endl;
+      // continue;
     }
 
     for (std::size_t j = 2; j < std::get<1>(truejets).size(); j++) {
@@ -230,8 +231,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       if (eta < min_eta[select] || eta > max_eta[select]) {
         continue;
       }
-
-      for (std::size_t k = 0; k < detectors[select]; k++) {   // Skip jets within R of the detector boundary
+      for (std::size_t k = 0; k < (std::size_t)detectors[select]; k++) {   // Skip jets within R of the detector boundary
         if (std::abs(std::get<1>(recjets)[i].eta() - detector_eta_boundaries[select][k]) < jetR) {
           // std::cout << "excluding jet near edge of " << jettype[select] << std::endl;
           continue;
@@ -244,7 +244,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       // }
       
       Double_t deltaRTrueRec = std::get<1>(truejets)[j].delta_R(std::get<1>(recjets)[i]);
-      // cout << deltaRTrueRec << endl;
+      std::cout << deltaRTrueRec << std::endl;
       Int_t et = 0;
       while ( ( std::get<1>(truejets)[j].eta() > partEta[et+1] ) && ( et < nEta )) et++;
       
