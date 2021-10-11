@@ -7,6 +7,7 @@
 #include <TMath.h>
 
 #include <iostream>
+#include <vector>
 
 // ANCHOR debug output verbosity
 Int_t verbosityJRH = 1;
@@ -92,8 +93,12 @@ TH1F *h_matched_count[njettypes] = {NULL};
 TH2F *h2D_truth_eta_phi[njettypes] = {NULL};
 TH2F *h2D_cluster_eta_phi[njettypes] = {NULL};
 
+// Jet Z Value (Z = max constituent energy / total jet energy)
+TH1F *h_jet_z_true[njettypes] = {NULL};
+TH1F *h_jet_z_reco[njettypes] = {NULL};
 
-double momentum(fastjet::PseudoJet jet) {return TMath::Sqrt(jet.px() * jet.px() + jet.py() * jet.py() + jet.pz() * jet.pz());}
+float jetZ(fastjet::PseudoJet jet);
+
 
 // ANCHOR main function to be called in event loop
 void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea>, std::vector<fastjet::PseudoJet>> recjets, std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea>, std::vector<fastjet::PseudoJet>> truejets, int select, float jetR){
@@ -139,6 +144,9 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     if (!h2D_truth_eta_phi[isel]) h2D_truth_eta_phi[isel] = new TH2F(Form("h2D_truth_eta_phi_%s", jettype[isel].Data()), "", 40, -4, 4, 40, 0, 7);
     if (!h2D_cluster_eta_phi[isel]) h2D_cluster_eta_phi[isel] = new TH2F(Form("h2D_cluster_eta_phi_%s", jettype[isel].Data()), "", 40, -4, 4, 40, 0, 7);
 
+    if (!h_jet_z_true[isel]) h_jet_z_true[isel] = new TH1F(Form("h_jet_z_true_%s", jettype[isel].Data()), "", 25, 0, 1);
+    if (!h_jet_z_reco[isel]) h_jet_z_reco[isel] = new TH1F(Form("h_jet_z_reco_%s", jettype[isel].Data()), "", 25, 0, 1);
+
     for (Int_t eT = 0; eT < nEta+1; eT++){
       if(!h_jetscale_pT[isel][eT])h_jetscale_pT[isel][eT] = new TH2F(Form("h_jetscale_%s_pT_%d",jettype[isel].Data(), eT),"",40,0,200,200,-1,1);
       if(!h_jetscale_p[isel][eT])h_jetscale_p[isel][eT] = new TH2F(Form("h_jetscale_%s_p_%d",jettype[isel].Data(), eT),"",40,0,200,200,-1,1);
@@ -175,8 +183,9 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       h2_truth_eta[select]->Fill(eta, eta);
       h2_truth_E[select]->Fill(std::get<1>(truejets)[j].E(), eta);
       h2_truth_pT[select]->Fill(std::get<1>(truejets)[j].pt(), eta);
-      h2_truth_p[select]->Fill(momentum(std::get<1>(truejets)[j]), eta);
+      h2_truth_p[select]->Fill(std::get<1>(truejets)[j].modp(), eta);
       h_constituents_true_Eta[select]->Fill(std::get<1>(truejets)[j].eta(),(std::get<1>(truejets)[j].constituents()).size());
+      h_jet_z_true[select]->Fill(jetZ(std::get<1>(truejets)[j]));
      
       jets++;
       h_truth_count[select]->Fill(std::get<1>(truejets)[j].E());    // Jet Efficiency
@@ -195,20 +204,29 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     // std::cout << "jets: " << jets << " matched: " << matched << "\n";
 
   for (std::size_t i = 0; i < std::get<1>(recjets).size(); i++) {
-    h2D_cluster_eta_phi[select]->Fill(std::get<1>(recjets)[i].eta(), std::get<1>(recjets)[i].phi());
     float eta = std::get<1>(recjets)[i].eta();
-    if (eta < min_eta[select] || eta > max_eta[select]) {
-      continue;
-    }
+    h2D_cluster_eta_phi[select]->Fill(std::get<1>(recjets)[i].eta(), std::get<1>(recjets)[i].phi());
     h2_reco_phi[select]->Fill(std::get<1>(recjets)[i].phi(), eta);
     h2_reco_eta[select]->Fill(eta, eta);
     h2_reco_E[select]->Fill(std::get<1>(recjets)[i].E(), eta);
     h2_reco_pT[select]->Fill(std::get<1>(recjets)[i].pt(), eta);
-    h2_reco_p[select]->Fill(momentum(std::get<1>(recjets)[i]), eta);
+    h2_reco_p[select]->Fill(std::get<1>(recjets)[i].modp(), eta);
+    h_jet_z_reco[select]->Fill(jetZ(std::get<1>(recjets)[i]));
     // if(verbosityJRH>1)std::cout << "jet " << i << ": "<< std::get<1>(recjets)[i].pt() << " " << std::get<1>(recjets)[i].rap() << " " << std::get<1>(recjets)[i].phi() << "  Ntrue: " << std::get<1>(truejets).size() << endl;
     h_constituents_Eta[select]->Fill(std::get<1>(recjets)[i].eta(),(std::get<1>(recjets)[i].constituents()).size());
 
+    // Reco jet cuts
+    if (eta < min_eta[select] || eta > max_eta[select]) {
+      continue;
+    }
+    float jet_z = jetZ(std::get<1>(recjets)[i]);
+    if (jet_z > 0.95) {
+      std::cout << "jet_z cut" << std::endl;
+      // continue;
+    }
+
     for (std::size_t j = 2; j < std::get<1>(truejets).size(); j++) {
+      // Truth jet cuts
       eta = std::get<1>(truejets)[j].eta();
       if (eta < min_eta[select] || eta > max_eta[select]) {
         continue;
@@ -219,9 +237,14 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
           continue;
         }
       }
+
+      // jet_z = jetZ(std::get<1>(truejets)[j]);   // Skip jets made mostly of a single constituent
+      // if (jet_z > 0.95) {
+      //   continue;
+      // }
       
       Double_t deltaRTrueRec = std::get<1>(truejets)[j].delta_R(std::get<1>(recjets)[i]);
-      // cout << deltaRTrueRec << endl;
+      std::cout << deltaRTrueRec << std::endl;
       Int_t et = 0;
       while ( ( std::get<1>(truejets)[j].eta() > partEta[et+1] ) && ( et < nEta )) et++;
       
@@ -231,14 +254,14 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
         h3D_truth_reco_eta[select]->Fill(std::get<1>(truejets)[j].eta(), std::get<1>(recjets)[i].eta(), eta);
         h3D_truth_reco_E[select]->Fill(std::get<1>(truejets)[j].E(), std::get<1>(recjets)[i].E(), eta);
         h3D_truth_reco_pT[select]->Fill(std::get<1>(truejets)[j].pt(), std::get<1>(recjets)[i].pt(), eta);
-        h3D_truth_reco_p[select]->Fill(momentum(std::get<1>(truejets)[j]), momentum(std::get<1>(recjets)[i]), eta);
+        h3D_truth_reco_p[select]->Fill(std::get<1>(truejets)[j].modp(), std::get<1>(recjets)[i].modp(), eta);
 
         h2D_jet_EtaReso_Eta[select]->Fill(std::get<1>(truejets)[j].eta(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
 
         if(verbosityJRH>1) std::cout << "rec jet " << i << " (" << std::get<1>(recjets)[i].E() << "E)  matched with true jet " << j << " (" << std::get<1>(truejets)[j].E() << "E) with dR = " << deltaRTrueRec << std::endl;
         h_jetscale_E[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[j].E())/std::get<1>(truejets)[j].E());
         h_jetscale_pT[select][et]->Fill(std::get<1>(truejets)[j].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[j].pt())/std::get<1>(truejets)[j].pt());
-        h_jetscale_p[select][et]->Fill(momentum(std::get<1>(truejets)[j]),(momentum(std::get<1>(recjets)[i])-momentum(std::get<1>(truejets)[j]))/momentum(std::get<1>(truejets)[j]));
+        h_jetscale_p[select][et]->Fill(std::get<1>(truejets)[j].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[j].modp())/std::get<1>(truejets)[j].modp());
         h_jetscale_eta[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
         h_jetscale_phi[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(truejets)[j].delta_phi_to(std::get<1>(recjets)[i])));
 
@@ -248,7 +271,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
         if(std::get<1>(truejets)[j].eta()>1.5){
           h_jetscale_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[j].E())/std::get<1>(truejets)[j].E());
           h_jetscale_pT[select][nEta]->Fill(std::get<1>(truejets)[j].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[j].pt())/std::get<1>(truejets)[j].pt());
-          h_jetscale_p[select][nEta]->Fill(momentum(std::get<1>(truejets)[j]),(momentum(std::get<1>(recjets)[i])-momentum(std::get<1>(truejets)[j]))/momentum(std::get<1>(truejets)[j]));
+          h_jetscale_p[select][nEta]->Fill(std::get<1>(truejets)[j].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[j].modp())/std::get<1>(truejets)[j].modp());
 
           h2D_jet_EtaReso_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
           h2D_jet_PhiReso_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(truejets)[j].delta_phi_to(std::get<1>(recjets)[i])));
@@ -259,6 +282,21 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     }
   } // jet loop end
 
+}
+
+float jetZ(fastjet::PseudoJet jet) {
+  if (!jet.has_associated_cluster_sequence()) {
+    return -1;
+  }
+  std::vector<fastjet::PseudoJet> constituents = jet.constituents();
+  float jet_E = jet.modp();
+  float max_constituent_E = -1;
+  for (std::vector<fastjet::PseudoJet>::iterator it = constituents.begin(); it != constituents.end(); it++) {
+    if (it->E() > max_constituent_E) {
+      max_constituent_E = it->modp();
+    }
+  }
+  return max_constituent_E / jet_E;
 }
 
 // ANCHOR save function after event loop
@@ -320,6 +358,9 @@ void jetresolutionhistosSave(){
 
     if (h2D_truth_eta_phi[isel]) h2D_truth_eta_phi[isel]->Write();
     if (h2D_cluster_eta_phi[isel]) h2D_cluster_eta_phi[isel]->Write();
+
+    if (h_jet_z_true[isel]) h_jet_z_true[isel]->Write();
+    if (h_jet_z_reco[isel]) h_jet_z_reco[isel]->Write();
 
     std::cout << "writing..." << std::endl;
   }
