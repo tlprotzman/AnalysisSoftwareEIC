@@ -25,15 +25,15 @@
 #include <fstream>
 
 void treeProcessing(
-    TString inFile              = "",
+    TString inFile              = "prop.4.ep-18x275-q2-100.txt",
     TString inFileGeometry      = "geometry.root",
     TString addOutputName       = "",
     bool do_reclus              = true,
-    bool do_jetfinding          = false,
+    bool do_jetfinding          = true,
     // Double_t maxNEvent = 1e5,
     bool hasTiming              = true,
     bool isALLSILICON           = true,
-    Double_t maxNEvent          = -1,
+    Double_t maxNEvent          = 1000,
     Int_t verbosity             = 0,
     bool doCalibration          = false,
     // Defaults to tracking from all layers.

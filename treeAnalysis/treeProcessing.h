@@ -222,15 +222,15 @@ void SetBranchAddressesTree(TTree* inputTree){
       inputTree->SetBranchAddress("event_weight", &_event_weight);
       inputTree->SetBranchAddress("n_generator_accepted", &_n_generator_accepted);
     }
-    inputTree->SetBranchAddress("nHits",                        &_nHitsLayers);
-    inputTree->SetBranchAddress("hits_layerID",                 _hits_layerID);
-    inputTree->SetBranchAddress("hits_x",               _hits_x);
-    inputTree->SetBranchAddress("hits_y",               _hits_y);
-    inputTree->SetBranchAddress("hits_z",               _hits_z);
-    inputTree->SetBranchAddress("hits_t",               _hits_t);
+    // inputTree->SetBranchAddress("nHits",                        &_nHitsLayers);
+    // inputTree->SetBranchAddress("hits_layerID",                 _hits_layerID);
+    // inputTree->SetBranchAddress("hits_x",               _hits_x);
+    // inputTree->SetBranchAddress("hits_y",               _hits_y);
+    // inputTree->SetBranchAddress("hits_z",               _hits_z);
+    // inputTree->SetBranchAddress("hits_t",               _hits_t);
 
     if (inputTree->GetBranchStatus("nTracks") ){
-      tracksEnabled = 1;
+      tracksEnabled = 0;
       inputTree->SetBranchAddress("nTracks",              &_nTracks);
       inputTree->SetBranchAddress("tracks_ID",            _track_ID);
       inputTree->SetBranchAddress("tracks_px",            _track_px);

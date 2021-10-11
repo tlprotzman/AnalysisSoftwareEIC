@@ -19,7 +19,7 @@ const int njettypes = 5;
 const int nInputs = 1;
 
 const int firstEtaBin[njettypes] = {1, 4, 4, 4, 4};
-const float min_eta[njettypes]   = {-3.5, -1.75, -1.75, -1.75, -1.75};  // TODO Save this info as metadata...
+const float min_eta[njettypes]   = {-3.5, -3.5, -3.5, -3.5, -3.5};  // TODO Save this info as metadata...
 const float max_eta[njettypes]   = {3.5, 3.5, 3.5, 3.5, 3.5};
 
 // Regions to group plots into
@@ -33,7 +33,7 @@ struct plottingStyleData
   int linestyle_jets[njettypes] = {1, 2, 2, 4, 8};//, 8, 9};
   TString str_jet_type[njettypes] = {"track", "calo", "hcal", "nocluster", "emcal"};
   TString str_jet_type_plot[njettypes] = {"Track Jets", "Calo Jets", "HCal Jets", "EMC No Cluster", "EMCal Jets"};
-  TString collisionSystem = "Pythia 6, ep 18x100, Q^{2}>100";
+  TString collisionSystem = "Pythia 8, ep 18x275, Q^{2}>100, Prod.4";
   TString jetMatching = "anti-#it{k}_{T}, #it{R} = 0.5";
   TString format;
 };
@@ -47,8 +47,8 @@ void drawInfo(plottingStyleData style, float x, float y, int jettype, int numExt
 
 
 void resolutionJETStree(
-    TString suffix              = "pdf",
-    TString mainInputFilename   = "treeAnalysis/treeProcessing/output_JRH.root",
+    TString suffix              = "png",
+    TString mainInputFilename   = "../treeAnalysis/treeProcessing/output_JRH.root",
     bool make_resolution_plots  = true,
     bool do_plot_scale          = true,
     bool make_spectra_plots     = true,

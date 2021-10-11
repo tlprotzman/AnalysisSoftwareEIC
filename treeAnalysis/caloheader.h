@@ -217,7 +217,7 @@ TVector3 TowerPositionVectorFromIndicesGeometry(int i_Eta,int i_Phi, int i_L, in
   float ypos = -10000;
   float zpos = -10000;
 
-  if(calogeomindex[caloSelect]==-1) cout << "calorimeter not found in geometry!" << endl;
+  if(calogeomindex[caloSelect]==-1) cout << "calorimeter " << caloSelect << " not found in geometry!" << endl;
   tt_geometry->GetEntry(calogeomindex[caloSelect]);
   if (caloSelect == kLFHCAL){
     for (Long64_t itow=0; itow<_calogeom_towers_N;itow++) {
