@@ -46,7 +46,7 @@ echo "Progress can be monitored with 'tail -f treeProcessing/logs/*.log'"
 # Start NUMTHREADS instances of the analyzer
 for (( i=0; i<$NUMTHREADS; i++ )); do
   printf -v J "%02d" $i
-  root -b -x -q -l 'treeProcessing.C("treeProcessing/input_files/x'$J'", "geometry.root", "'$J'", true, true, true, true, -1, 0, true)' > "treeProcessing/logs/$J.log" 2> "treeProcessing/logs/$J.err" &
+  root -b -x -q -l 'treeProcessing.C("treeProcessing/input_files/x'$J'", "geometry.root", "'$J'", true, true, true, true, -1, 0, false)' > "treeProcessing/logs/$J.log" 2> "treeProcessing/logs/$J.err" &
   PIDS+=( $! )
 done;
 

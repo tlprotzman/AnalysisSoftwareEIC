@@ -17,7 +17,7 @@ Int_t verbosityJRH = 1;
 const int njettypes = 7;
 TString jettype[njettypes] = {"track", "full","hcal", "calo","all", "nocluster", "emcal"};
 
-const float min_eta[njettypes] = {-3.5, 0, --3.5, --3.5, 0, --3.5, --3.5};  // TODO Save this info as metadata...
+const float min_eta[njettypes] = {-3.5, 0, -3.5, -3.5, 0, -3.5, -3.5};  // TODO Save this info as metadata...
 const float max_eta[njettypes] = {3.5, 0, 3.5, 3.5, 0, 3.5, 3.5};
 
 
@@ -26,11 +26,11 @@ const int max_detector_sections = 1;
 const int detectors[njettypes] = {1, 0, 1, 1, 0, 1, 1};
 const float detector_eta_boundaries[njettypes][max_detector_sections + 1] = {{-3.5, 3.5},    // Tracking
                                                                     {},
-                                                                    {--3.5, 3.5},     // HCal
-                                                                    {--3.5, 3.5},     // Calo
+                                                                    {-3.5, 3.5},     // HCal
+                                                                    {-3.5, 3.5},     // Calo
                                                                     {},
-                                                                    {--3.5, 3.5},     // Calo
-                                                                    {--3.5, 3.5}};    // ECal
+                                                                    {-3.5, 3.5},     // Calo
+                                                                    {-3.5, 3.5}};    // ECal
 
 TH2F* h_jet_E_eta[njettypes] = {NULL};
 TH2F* h_MCjet_E_eta[njettypes] = {NULL};
@@ -221,8 +221,8 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
     }
     float jet_z = jetZ(std::get<1>(recjets)[i]);
     if (jet_z > 0.95) {
-      std::cout << "jet_z cut" << std::endl;
-      // continue;
+      // std::cout << "jet_z cut" << std::endl;
+      continue;
     }
 
     for (std::size_t j = 2; j < std::get<1>(truejets).size(); j++) {
@@ -238,13 +238,13 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
         }
       }
 
-      // jet_z = jetZ(std::get<1>(truejets)[j]);   // Skip jets made mostly of a single constituent
-      // if (jet_z > 0.95) {
-      //   continue;
-      // }
+      jet_z = jetZ(std::get<1>(truejets)[j]);   // Skip jets made mostly of a single constituent
+      if (jet_z > 0.95) {
+        continue;
+      }
       
       Double_t deltaRTrueRec = std::get<1>(truejets)[j].delta_R(std::get<1>(recjets)[i]);
-      std::cout << deltaRTrueRec << std::endl;
+      // std::cout << deltaRTrueRec << std::endl;
       Int_t et = 0;
       while ( ( std::get<1>(truejets)[j].eta() > partEta[et+1] ) && ( et < nEta )) et++;
       

@@ -99,7 +99,7 @@
 //   Float_t betaResolFit[20]    = { 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05,
 //                                 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};                                    
   
-  Color_t colorEta[nEta+1]         = {kBlue+1, kBlue-6, kViolet+2, kViolet-5, kMagenta-6, kPink-9, kRed+1,  kOrange+7, kOrange, kYellow-6, 
+  Color_t colorEta[nEta+1]         = {kBlue, kRed, kViolet, kViolet-5, kMagenta-6, kPink-9, kRed+1,  kOrange+7, kOrange, kYellow-6, 
                                   kGreen+1, kGreen-5, kCyan+1, kCyan+3, kAzure+2, kBlack };
   Style_t markerStyleEta[nEta+1]   = {24, 25, 27, 28, 30, 42, 46, 24, 25, 27, 
                                  28, 30, 42, 46, 24, 20};

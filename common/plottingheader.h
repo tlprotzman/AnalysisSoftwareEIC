@@ -59,16 +59,16 @@ void DrawGammaCanvasSettings( TCanvas* c1,
                             Double_t rightMargin,
                             Double_t topMargin,
                             Double_t bottomMargin){
-  c1->SetTickx();
-  c1->SetTicky();
-  c1->SetGridx(0);
-  c1->SetGridy(0);
-  c1->SetLogy(0);
-  c1->SetLeftMargin(leftMargin);
-  c1->SetRightMargin(rightMargin);
-  c1->SetTopMargin(topMargin);
-  c1->SetBottomMargin(bottomMargin);
-  c1->SetFillColor(0);
+  // c1->SetTickx();
+  // c1->SetTicky();
+  // c1->SetGridx(0);
+  // c1->SetGridy(0);
+  // c1->SetLogy(0);
+  // c1->SetLeftMargin(leftMargin);
+  // c1->SetRightMargin(rightMargin);
+  // c1->SetTopMargin(topMargin);
+  // c1->SetBottomMargin(bottomMargin);
+  // c1->SetFillColor(0);
 }
 
 //__________________________________________________________________________________________________________
@@ -233,27 +233,27 @@ void SetStyleHistoTH2ForGraphs( TH2* histo,
   histo->SetYTitle(YTitle);
   histo->SetTitle("");
 
-  histo->GetXaxis()->SetLabelFont(textFontLabel);
-  histo->GetYaxis()->SetLabelFont(textFontLabel);
-  histo->GetZaxis()->SetLabelFont(textFontLabel);
-  histo->GetXaxis()->SetTitleFont(textFontTitle);
-  histo->GetYaxis()->SetTitleFont(textFontTitle);
-  histo->GetZaxis()->SetTitleFont(textFontTitle);
+  // histo->GetXaxis()->SetLabelFont(textFontLabel);
+  // histo->GetYaxis()->SetLabelFont(textFontLabel);
+  // histo->GetZaxis()->SetLabelFont(textFontLabel);
+  // histo->GetXaxis()->SetTitleFont(textFontTitle);
+  // histo->GetYaxis()->SetTitleFont(textFontTitle);
+  // histo->GetZaxis()->SetTitleFont(textFontTitle);
 
-  histo->GetXaxis()->SetLabelSize(xLableSize);
-  histo->GetXaxis()->SetTitleSize(xTitleSize);
-  histo->GetXaxis()->SetTitleOffset(xTitleOffset);
-  histo->GetXaxis()->SetNdivisions(xNDivisions,kTRUE);
+  // histo->GetXaxis()->SetLabelSize(xLableSize);
+  // histo->GetXaxis()->SetTitleSize(xTitleSize);
+  // histo->GetXaxis()->SetTitleOffset(xTitleOffset);
+  // histo->GetXaxis()->SetNdivisions(xNDivisions,kTRUE);
 
-  histo->GetYaxis()->SetDecimals();
-  histo->GetYaxis()->SetLabelSize(yLableSize);
-  histo->GetYaxis()->SetTitleSize(yTitleSize);
-  histo->GetYaxis()->SetTitleOffset(yTitleOffset);
-  histo->GetYaxis()->SetNdivisions(yNDivisions,kTRUE);
+  // histo->GetYaxis()->SetDecimals();
+  // histo->GetYaxis()->SetLabelSize(yLableSize);
+  // histo->GetYaxis()->SetTitleSize(yTitleSize);
+  // histo->GetYaxis()->SetTitleOffset(yTitleOffset);
+  // histo->GetYaxis()->SetNdivisions(yNDivisions,kTRUE);
   
-  histo->GetZaxis()->SetDecimals();
-  histo->GetZaxis()->SetLabelSize(yLableSize);
-  histo->GetZaxis()->SetTitleSize(yTitleSize);
+  // histo->GetZaxis()->SetDecimals();
+  // histo->GetZaxis()->SetLabelSize(yLableSize);
+  // histo->GetZaxis()->SetTitleSize(yTitleSize);
   
 }
 
@@ -363,21 +363,21 @@ void SetStyleHistoTHStackForGraphs( THStack* histo,
   histo->GetYaxis()->SetTitle(YTitle);
   histo->SetTitle("");
 
-  histo->GetXaxis()->SetLabelFont(textFontLabel);
-  histo->GetYaxis()->SetLabelFont(textFontLabel);
-  histo->GetXaxis()->SetTitleFont(textFontTitle);
-  histo->GetYaxis()->SetTitleFont(textFontTitle);
+  // histo->GetXaxis()->SetLabelFont(textFontLabel);
+  // histo->GetYaxis()->SetLabelFont(textFontLabel);
+  // histo->GetXaxis()->SetTitleFont(textFontTitle);
+  // histo->GetYaxis()->SetTitleFont(textFontTitle);
 
-  histo->GetXaxis()->SetLabelSize(xLableSize);
-  histo->GetXaxis()->SetTitleSize(xTitleSize);
-  histo->GetXaxis()->SetTitleOffset(xTitleOffset);
-  histo->GetXaxis()->SetNdivisions(xNDivisions,kTRUE);
+  // histo->GetXaxis()->SetLabelSize(xLableSize);
+  // histo->GetXaxis()->SetTitleSize(xTitleSize);
+  // histo->GetXaxis()->SetTitleOffset(xTitleOffset);
+  // histo->GetXaxis()->SetNdivisions(xNDivisions,kTRUE);
 
-  histo->GetYaxis()->SetDecimals();
-  histo->GetYaxis()->SetLabelSize(yLableSize);
-  histo->GetYaxis()->SetTitleSize(yTitleSize);
-  histo->GetYaxis()->SetTitleOffset(yTitleOffset);
-  histo->GetYaxis()->SetNdivisions(yNDivisions,kTRUE);
+  // histo->GetYaxis()->SetDecimals();
+  // histo->GetYaxis()->SetLabelSize(yLableSize);
+  // histo->GetYaxis()->SetTitleSize(yTitleSize);
+  // histo->GetYaxis()->SetTitleOffset(yTitleOffset);
+  // histo->GetYaxis()->SetNdivisions(yNDivisions,kTRUE);
 }
 
 
@@ -426,6 +426,8 @@ void drawLatexAdd(TString latextext,
   if(alignRight)
     latexDummy->SetTextAlign(31);
   latexDummy->SetTextColor(textcolor);
+  latexDummy->SetTextFont(43);
+  latexDummy->SetTextSize(35);
   latexDummy->Draw();
 }
 
@@ -447,10 +449,10 @@ void DrawGammaSetMarker(    TH1* histo1,
   histo1->SetMarkerSize(markerSize);
   histo1->SetMarkerColor(markerColor);
   histo1->SetLineColor(lineColor);
-  histo1->GetYaxis()->SetLabelFont(42);
-  histo1->GetXaxis()->SetLabelFont(42);
-  histo1->GetYaxis()->SetTitleFont(62);
-  histo1->GetXaxis()->SetTitleFont(62);
+  // histo1->GetYaxis()->SetLabelFont(42);
+  // histo1->GetXaxis()->SetLabelFont(42);
+  // histo1->GetYaxis()->SetTitleFont(62);
+  // histo1->GetXaxis()->SetTitleFont(62);
 }
 
 
@@ -599,17 +601,17 @@ TLegend *GetAndSetLegend2(  Double_t positionX,
                           ){
 
   TLegend *legend = new TLegend(positionX,positionY,positionXRight,positionYUp);
-  legend->SetNColumns(columns);
-  legend->SetLineColor(0);
-  legend->SetLineWidth(0);
-  legend->SetFillColor(0);
-  legend->SetFillStyle(0);
-  legend->SetLineStyle(0);
-  legend->SetBorderSize(0);
+  // legend->SetNColumns(columns);
+  // legend->SetLineColor(0);
+  // legend->SetLineWidth(0);
+  // legend->SetFillColor(0);
+  // legend->SetFillStyle(0);
+  // legend->SetLineStyle(0);
+  // legend->SetBorderSize(0);
   legend->SetTextFont(textFont);
   legend->SetTextSize(textSize);
-  if (margin != 0) legend->SetMargin(margin);
-  if (header.CompareTo("")!= 0) legend->SetHeader(header);
+  // if (margin != 0) legend->SetMargin(margin);
+  // if (header.CompareTo("")!= 0) legend->SetHeader(header);
   return legend;
 }
 
