@@ -17,8 +17,8 @@ void trackingeffi(
                             TString inputFileName   = "file.root",
                             TString suffix          = "pdf",
                             TString addLabel        = "",
+                            Int_t trackSource       = 0,
                             Int_t trackCuts         = 0
-                            
 ){
 
   gROOT->Reset();
@@ -29,22 +29,22 @@ void trackingeffi(
   TString readTrackClass            = "";
   TString writeLabel                = "";
   TString labelPlotCuts             = "";
-  if (trackCuts == 1){
-    readTrackClass                  = "LI2";
-    addLabel                        = addLabel+"-LI2";
-    writeLabel                      = "LI2";
-    labelPlotCuts                   = "#geq 2 tracker hits";
-  } else if (trackCuts == 2){
-    readTrackClass                  = "LI3";
-    addLabel                        = addLabel+"-LI3";
-    writeLabel                      = "LI3";
-    labelPlotCuts                   = "#geq 3 tracker hits";
+  if (trackSource == 1){
+    readTrackClass                  = "INNER";
+    addLabel                        = addLabel+"-INNER";
+    writeLabel                      = "INNER";
+    labelPlotCuts                   = "i. tr.";
+  } else if (trackSource == 2){
+    readTrackClass                  = "SILICON";
+    addLabel                        = addLabel+"-SILICON";
+    writeLabel                      = "SILICON";
+    labelPlotCuts                   = "i. tr. w/o o. gas tr.";
   }
     
   for (Int_t eR = 0; eR < 3; eR++) cout << "before: "<< labelEtaRange[eR].Data() << endl;
   
-  TString collisionSystem = GetCollisionEnergy(addLabel);
-  TString magnetLabel     = GetMagnetLabel(addLabel);
+  TString ecceSimLabel = "#it{#bf{ECCE}} simulation"; //GetCollisionEnergy(addLabel);
+  TString collisionEnergyLabel     = ""; //GetCollisionEnergy(addLabel);
   TString pTHard = "";
   Int_t nLinesCol = 1;
   if (addLabel.Contains("pTHard5GeV")) {
@@ -52,10 +52,11 @@ void trackingeffi(
     nLinesCol++;
   }
 
-  TString outputDir                 = Form("plots/%s/Effi%s",dateForOutput.Data(),addLabel.Data());
+  TString outputDir                 = Form("plots/%s/Effi%s_%d",dateForOutput.Data(),addLabel.Data(),trackSource);
   gSystem->Exec("mkdir -p "+outputDir);
 
   TString detLabel        = GetTrackerLabel(addLabel);
+  detLabel                = "full detector setup";
   Int_t nActiveEta        = 14;
   Double_t maxPtSigma     = 0.175;
   Double_t maxEtaSigma    = 0.005;
@@ -102,20 +103,20 @@ void trackingeffi(
     cout << Form("h_%s_MC_pT", partNameET[pid].Data()) << endl;
     h_trackMapMC_eta_MCpT[pid]                  = (TH2F*)inputFile->Get(Form("h_%s_MC_pT", partNameET[pid].Data()));
     h_trackMapMC_eta_MCpT[pid]->Sumw2();
-    cout << Form("h_%s_rec_pT", partNameET[pid].Data()) << endl;
-    h_trackMapRec_eta_pT[pid]                   = (TH2F*)inputFile->Get(Form("h_%s_rec_pT", partNameET[pid].Data()));
+    cout << Form("h_%s_rec_pT_%d", partNameET[pid].Data(),trackSource) << endl;
+    h_trackMapRec_eta_pT[pid]                   = (TH2F*)inputFile->Get(Form("h_%s_rec_pT_%d", partNameET[pid].Data(),trackSource));
     h_trackMapRec_eta_pT[pid]->Sumw2();
-    cout << Form("h_%s_rec_truepT", partNameET[pid].Data()) << endl;
-    h_trackMapRec_eta_MCpT[pid]                 = (TH2F*)inputFile->Get(Form("h_%s_rec_truepT", partNameET[pid].Data()));
+    cout << Form("h_%s_rec_truepT_%d", partNameET[pid].Data(),trackSource) << endl;
+    h_trackMapRec_eta_MCpT[pid]                 = (TH2F*)inputFile->Get(Form("h_%s_rec_truepT_%d", partNameET[pid].Data(),trackSource));
     h_trackMapRec_eta_MCpT[pid]->Sumw2();
     cout << Form("h_%s_MC_p", partNameET[pid].Data()) << endl;
     h_trackMapMC_eta_MCp[pid]                   = (TH2F*)inputFile->Get(Form("h_%s_MC_p", partNameET[pid].Data()));
     h_trackMapMC_eta_MCp[pid]->Sumw2();
-    cout << Form("h_%s_rec_p", partNameET[pid].Data()) << endl;
-    h_trackMapRec_eta_p[pid]                    = (TH2F*)inputFile->Get(Form("h_%s_rec_p", partNameET[pid].Data()));
+    cout << Form("h_%s_rec_p_%d", partNameET[pid].Data(),trackSource) << endl;
+    h_trackMapRec_eta_p[pid]                    = (TH2F*)inputFile->Get(Form("h_%s_rec_p_%d", partNameET[pid].Data(),trackSource));
     h_trackMapRec_eta_p[pid]->Sumw2();
-    cout << Form("h_%s_rec_truep", partNameET[pid].Data()) << endl;
-    h_trackMapRec_eta_MCp[pid]                  = (TH2F*)inputFile->Get(Form("h_%s_rec_truep", partNameET[pid].Data()));
+    cout << Form("h_%s_rec_truep_%d", partNameET[pid].Data(),trackSource) << endl;
+    h_trackMapRec_eta_MCp[pid]                  = (TH2F*)inputFile->Get(Form("h_%s_rec_truep_%d", partNameET[pid].Data(),trackSource));
     h_trackMapRec_eta_MCp[pid]->Sumw2();
   }
   
@@ -241,10 +242,10 @@ void trackingeffi(
     legendPtResM->Draw();
     DrawGammaLines(0, 20, 1., 1., 2, kGray+2, 7);
       
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     cReso->Print(Form("%s/Effi_%s_pT.%s", outputDir.Data(), partName[pid].Data(), suffix.Data()));
 
@@ -257,10 +258,10 @@ void trackingeffi(
     legendPtResM->Draw();
     DrawGammaLines(0, 20, 1., 1., 2, kGray+2, 7);
       
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     cReso->Print(Form("%s/Effi_%s_MCpT.%s", outputDir.Data(), partName[pid].Data(), suffix.Data()));
 
@@ -279,10 +280,10 @@ void trackingeffi(
       }
     }
     legendPtResMP->Draw();
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     cReso->Print(Form("%s/Effi_%s_p.%s", outputDir.Data(), partName[pid].Data(), suffix.Data()));
 
@@ -294,10 +295,10 @@ void trackingeffi(
       h_effi_rec_MCp[pid][iEta]->Draw("same,p");
     }
     legendPtResMP->Draw();
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
 
     cReso->Print(Form("%s/Effi_%s_MCp.%s", outputDir.Data(), partName[pid].Data(), suffix.Data()));
@@ -322,10 +323,10 @@ void trackingeffi(
       legendPtResPID->AddEntry(h_effi_rec_MCpT[pid][iEta],partLabel[pid].Data(),"p");
     }
     legendPtResPID->Draw();
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%1.1f<#eta<%1.1f, %s", etaMin, etaMax, detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     cReso->Print(Form("%s/EffiPID_MCpT_%d_%d.%s", outputDir.Data(), (Int_t)(etaMin*10), (Int_t)(etaMax*10), suffix.Data()));
 
@@ -338,10 +339,10 @@ void trackingeffi(
       h_effi_rec_MCp[pid][iEta]->Draw("same,p");      
     }
     legendPtResPID->Draw();
-    drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
     drawLatexAdd(Form("%1.1f<#eta<%1.1f, %s", etaMin, etaMax, detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-    drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+    drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
     cReso->Print(Form("%s/EffiPID_MCp_%d_%d.%s", outputDir.Data(), (Int_t)(etaMin*10), (Int_t)(etaMax*10), suffix.Data()));
     cReso->SetLogx(kFALSE);
@@ -371,10 +372,10 @@ void trackingeffi(
       legendPtEtaRegion[eR]->Draw();
       DrawGammaLines(0., 20, 1., 1., 2, kGray+2, 7);
         
-      drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
       drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-      drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       cReso->Print(Form("%s/Effi_%s_%s_MCpT.%s", outputDir.Data(), nameOutEtaRange[eR].Data(), partName[pid].Data(), suffix.Data()));
 
@@ -388,10 +389,10 @@ void trackingeffi(
       legendPtEtaRegion[eR]->Draw();
       DrawGammaLines(0., 20, 1., 1., 2, kGray+2, 7);
         
-      drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
       drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-      drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       cReso->Print(Form("%s/Effi_%s_%s_pT.%s", outputDir.Data(), nameOutEtaRange[eR].Data(), partName[pid].Data(), suffix.Data()));
 
@@ -413,10 +414,10 @@ void trackingeffi(
       legendPEtaRegion[eR]->Draw();
       DrawGammaLines(0.1, 100, 1., 1., 2, kGray+2, 7);
         
-      drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
       drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-      drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       cReso->Print(Form("%s/Effi_%s_%s_MCp.%s", outputDir.Data(), nameOutEtaRange[eR].Data(), partName[pid].Data(), suffix.Data()));
 
@@ -430,10 +431,10 @@ void trackingeffi(
       legendPEtaRegion[eR]->Draw();
       DrawGammaLines(0.1, 100, 1., 1., 2, kGray+2, 7);
         
-      drawLatexAdd(collisionSystem,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(ecceSimLabel,0.95,0.91,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (pTHard.CompareTo("") != 0) drawLatexAdd(pTHard,0.95,0.91-0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);    
       drawLatexAdd(Form("%s in %s", partLabel[pid].Data(), detLabel.Data()),0.95,0.91-nLinesCol*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
-      drawLatexAdd(Form("%s", magnetLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
+      drawLatexAdd(Form("%s", collisionEnergyLabel.Data()),0.95,0.91-(nLinesCol+1)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       if (writeLabel.CompareTo("") != 0) drawLatexAdd(labelPlotCuts,0.95,0.91-(nLinesCol+2)*0.85*textSizeLabelsRel,0.85*textSizeLabelsRel,kFALSE,kFALSE,kTRUE);
       cReso->Print(Form("%s/Effi_%s_%s_p.%s", outputDir.Data(), nameOutEtaRange[eR].Data(), partName[pid].Data(), suffix.Data()));
 
@@ -450,22 +451,22 @@ void trackingeffi(
   directoryTrEffi->cd();
   for (Int_t iEta = 0; iEta < nEta+1; iEta++){
     for (Int_t pid = 0; pid < 6; pid++){
-      h_effi_rec_pT[pid][iEta]->Write(Form("effi%s_pT_%d",partName[pid].Data(), iEta),TObject::kOverwrite);
-      h_effi_rec_MCpT[pid][iEta]->Write(Form("effi%s_MCpT_%d",partName[pid].Data(), iEta),TObject::kOverwrite);
-      h_effi_rec_p[pid][iEta]->Write(Form("effi%s_p_%d",partName[pid].Data(), iEta),TObject::kOverwrite);
-      h_effi_rec_MCp[pid][iEta]->Write(Form("effi%s_MCp_%d",partName[pid].Data(), iEta),TObject::kOverwrite);
-      h_spectra_MC_MCpT[pid][iEta]->Write(Form("spectraMC%s_MCpT_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectra_rec_pT[pid][iEta]->Write(Form("spectraRec%s_pT_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectra_rec_MCpT[pid][iEta]->Write(Form("spectraRec%s_MCpT_%d",partName[pid].Data(), iEta), TObject::kOverwrite); 
-      h_spectra_MC_MCp[pid][iEta]->Write( Form("spectraMC%s_MCp_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectra_rec_p[pid][iEta]->Write( Form("spectraRec%s_p_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectra_rec_MCp[pid][iEta]->Write( Form("spectraRec%s_MCp_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectraReb_MC_MCpT[pid][iEta]->Write( Form("spectraRebMC%s_MCpT_%d", partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectraReb_rec_pT[pid][iEta]->Write( Form("spectraRebRec%s_pT_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectraReb_rec_MCpT[pid][iEta]->Write( Form("spectraRebRec%s_MCpT_%d",partName[pid].Data(), iEta), TObject::kOverwrite);      
-      h_spectraReb_MC_MCp[pid][iEta]->Write( Form("spectraRebMC%s_MCp_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectraReb_rec_p[pid][iEta]->Write( Form("spectraRebRec%s_p_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
-      h_spectraReb_rec_MCp[pid][iEta]->Write( Form("spectraRebRec%s_MCp_%d",partName[pid].Data(), iEta), TObject::kOverwrite);
+      h_effi_rec_pT[pid][iEta]->Write(Form("effi%s_pT_%d_%d",partName[pid].Data(), iEta, trackSource),TObject::kOverwrite);
+      h_effi_rec_MCpT[pid][iEta]->Write(Form("effi%s_MCpT_%d_%d",partName[pid].Data(), iEta, trackSource),TObject::kOverwrite);
+      h_effi_rec_p[pid][iEta]->Write(Form("effi%s_p_%d_%d",partName[pid].Data(), iEta, trackSource),TObject::kOverwrite);
+      h_effi_rec_MCp[pid][iEta]->Write(Form("effi%s_MCp_%d_%d",partName[pid].Data(), iEta, trackSource),TObject::kOverwrite);
+      h_spectra_MC_MCpT[pid][iEta]->Write(Form("spectraMC%s_MCpT_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectra_rec_pT[pid][iEta]->Write(Form("spectraRec%s_pT_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectra_rec_MCpT[pid][iEta]->Write(Form("spectraRec%s_MCpT_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite); 
+      h_spectra_MC_MCp[pid][iEta]->Write( Form("spectraMC%s_MCp_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectra_rec_p[pid][iEta]->Write( Form("spectraRec%s_p_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectra_rec_MCp[pid][iEta]->Write( Form("spectraRec%s_MCp_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectraReb_MC_MCpT[pid][iEta]->Write( Form("spectraRebMC%s_MCpT_%d_%d", partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectraReb_rec_pT[pid][iEta]->Write( Form("spectraRebRec%s_pT_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectraReb_rec_MCpT[pid][iEta]->Write( Form("spectraRebRec%s_MCpT_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);      
+      h_spectraReb_MC_MCp[pid][iEta]->Write( Form("spectraRebMC%s_MCp_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectraReb_rec_p[pid][iEta]->Write( Form("spectraRebRec%s_p_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
+      h_spectraReb_rec_MCp[pid][iEta]->Write( Form("spectraRebRec%s_MCp_%d_%d",partName[pid].Data(), iEta, trackSource), TObject::kOverwrite);
     }
   }
   outputFile->Write();

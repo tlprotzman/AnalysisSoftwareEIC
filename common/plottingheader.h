@@ -24,6 +24,8 @@
 #include <TGraphErrors.h>
 #include <TGaxis.h>
 #include <TLegend.h>
+#include <TFrame.h>
+#include <TLorentzVector.h>
 
 //__________________________________________________________________________________________________________
 TString ReturnDateStringForOutput(){
@@ -309,6 +311,96 @@ void SetStyleHistoTH3ForGraphs( TH3* histo,
   
 }
 
+
+    //__________________________________________________________________________________________________________
+    void ReturnCorrectValuesForCanvasScaling(   Int_t sizeX,
+                                                Int_t sizeY,
+                                                Int_t nCols,
+                                                Int_t nRows,
+                                                Double_t leftMargin,
+                                                Double_t rightMargin,
+                                                Double_t upperMargin,
+                                                Double_t lowerMargin,
+                                                Double_t* arrayBoundariesX,
+                                                Double_t* arrayBoundariesY,
+                                                Double_t* relativeMarginsX,
+                                                Double_t* relativeMarginsY,
+                                                Bool_t verbose = kTRUE){
+        Int_t realsizeX             = sizeX- (Int_t)(sizeX*leftMargin)- (Int_t)(sizeX*rightMargin);
+        Int_t realsizeY             = sizeY- (Int_t)(sizeY*upperMargin)- (Int_t)(sizeY*lowerMargin);
+
+        Int_t nPixelsLeftColumn     = (Int_t)(sizeX*leftMargin);
+        Int_t nPixelsRightColumn    = (Int_t)(sizeX*rightMargin);
+        Int_t nPixelsUpperColumn    = (Int_t)(sizeY*upperMargin);
+        Int_t nPixelsLowerColumn    = (Int_t)(sizeY*lowerMargin);
+
+        Int_t nPixelsSinglePlotX    = (Int_t) (realsizeX/nCols);
+        Int_t nPixelsSinglePlotY    = (Int_t) (realsizeY/nRows);
+        if(verbose){
+            std::cout << realsizeX << "\t" << nPixelsSinglePlotX << std::endl;
+            std::cout << realsizeY << "\t" << nPixelsSinglePlotY << std::endl;
+            std::cout << nPixelsLeftColumn << "\t" << nPixelsRightColumn  << "\t" << nPixelsLowerColumn << "\t" << nPixelsUpperColumn << std::endl;
+        }
+        Int_t pixel = 0;
+        if(verbose)std::cout << "boundaries X" << std::endl;
+        for (Int_t i = 0; i < nCols+1; i++){
+            if (i == 0){
+                arrayBoundariesX[i] = 0.;
+                pixel = pixel+nPixelsLeftColumn+nPixelsSinglePlotX;
+            } else if (i == nCols){
+                arrayBoundariesX[i] = 1.;
+                pixel = pixel+nPixelsRightColumn;
+            } else {
+                arrayBoundariesX[i] = (Double_t)pixel/sizeX;
+                pixel = pixel+nPixelsSinglePlotX;
+            }
+            if(verbose)std::cout << i << "\t" << arrayBoundariesX[i] << "\t" << pixel<<std::endl;
+        }
+
+        if(verbose)std::cout << "boundaries Y" << std::endl;
+        pixel = sizeY;
+        for (Int_t i = 0; i < nRows+1; i++){
+            if (i == 0){
+                arrayBoundariesY[i] = 1.;
+                pixel = pixel-nPixelsUpperColumn-nPixelsSinglePlotY;
+            } else if (i == nRows){
+                arrayBoundariesY[i] = 0.;
+                pixel = pixel-nPixelsLowerColumn;
+            } else {
+                arrayBoundariesY[i] = (Double_t)pixel/sizeY;
+                pixel = pixel-nPixelsSinglePlotY;
+            }
+            if(verbose)std::cout << i << "\t" << arrayBoundariesY[i] <<"\t" << pixel<<std::endl;
+        }
+
+        relativeMarginsX[0]         = (Double_t)nPixelsLeftColumn/(nPixelsLeftColumn+nPixelsSinglePlotX);
+        relativeMarginsX[1]         = 0;
+        relativeMarginsX[2]         = (Double_t)nPixelsRightColumn/(nPixelsRightColumn+nPixelsSinglePlotX);;
+
+        relativeMarginsY[0]         = (Double_t)nPixelsUpperColumn/(nPixelsUpperColumn+nPixelsSinglePlotY);
+        relativeMarginsY[1]         = 0;
+        relativeMarginsY[2]         = (Double_t)nPixelsLowerColumn/(nPixelsLowerColumn+nPixelsSinglePlotY);;
+
+        return;
+    }
+
+    //__________________________________________________________________________________________________________
+    void DrawGammaPadSettings( TPad* pad1,
+                            Double_t leftMargin,
+                            Double_t rightMargin,
+                            Double_t topMargin,
+                            Double_t bottomMargin){
+        pad1->SetFillColor(0);
+        pad1->GetFrame()->SetFillColor(0);
+        pad1->SetBorderMode(0);
+        pad1->SetLeftMargin(leftMargin);
+        pad1->SetBottomMargin(bottomMargin);
+        pad1->SetRightMargin(rightMargin);
+        pad1->SetTopMargin(topMargin);
+        pad1->SetTickx();
+        pad1->SetTicky();
+    }
+
   //__________________________________________________________________________________________________________
 void SetStyleHistoTH1ForGraphs( TH1* histo,
                                 TString XTitle,
@@ -444,7 +536,10 @@ void DrawGammaSetMarker(    TH1* histo1,
                             Style_t markerStyle,
                             Size_t markerSize,
                             Color_t markerColor,
-                            Color_t lineColor ) {
+                            Color_t lineColor,
+                            Style_t lineStyle = 1,
+                            Style_t lineWidth = 1
+                       ) {
   histo1->SetMarkerStyle(markerStyle);
   histo1->SetMarkerSize(markerSize);
   histo1->SetMarkerColor(markerColor);
@@ -529,12 +624,15 @@ void DrawGammaSetMarkerTGraphErr(   TGraphErrors* graph,
                                     Width_t lineWidth       = 1,
                                     Bool_t boxes            = kFALSE,
                                     Color_t fillColor       = 0,
-                                    Bool_t isHollow         = kFALSE) {
+                                    Bool_t isHollow         = kFALSE,
+                                    Style_t lineStyle       = 1
+                                ) {
   graph->SetMarkerStyle(markerStyle);
   graph->SetMarkerSize(markerSize);
   graph->SetMarkerColor(markerColor);
   graph->SetLineColor(lineColor);
   graph->SetLineWidth(lineWidth);
+  graph->SetLineStyle(lineStyle);
   if (boxes){
     graph->SetFillColor(fillColor);
     if (fillColor!=0){
@@ -678,6 +776,9 @@ void SetPlotStyle() {
 
   TColor::CreateGradientColorTable(nRGBs, stops, red, green, blue, nCont);
   gStyle->SetNumberContours(nCont);
+  
+//   gStyle->SetPalette(kBird);
+  
 }
 
 //__________________________________________________________________________________________________________
