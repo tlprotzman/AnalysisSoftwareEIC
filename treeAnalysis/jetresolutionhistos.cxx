@@ -225,7 +225,7 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       continue;
     }
 
-    for (std::size_t j = 2; j < std::get<1>(truejets).size(); j++) {
+    for (std::size_t j = 0; j < std::get<1>(truejets).size(); j++) {
       // Truth jet cuts
       eta = std::get<1>(truejets)[j].eta();
       if (eta < min_eta[select] || eta > max_eta[select]) {
