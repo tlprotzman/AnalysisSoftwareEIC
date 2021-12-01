@@ -19,6 +19,7 @@ TString jettype[njettypes] = {"track", "full","hcal", "calo","all", "nocluster",
 
 const float min_eta[njettypes] = {-3.5, 0, -3.5, -3.5, 0, -3.5, -3.5};  // TODO Save this info as metadata...
 const float max_eta[njettypes] = {3.5, 0, 3.5, 3.5, 0, 3.5, 3.5};
+const float MAX_DR = 0.25;
 
 
 // Edges of detectors; prevent jet finding within R of boundaries
@@ -225,6 +226,9 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       continue;
     }
 
+    int closest_index = -1;
+    int potential_matches = 0;
+    float closest_dr = MAX_DR;
     for (std::size_t j = 0; j < std::get<1>(truejets).size(); j++) {
       // Truth jet cuts
       eta = std::get<1>(truejets)[j].eta();
@@ -244,41 +248,50 @@ void jetresolutionhistos(std::tuple<std::shared_ptr<fastjet::ClusterSequenceArea
       }
       
       Double_t deltaRTrueRec = std::get<1>(truejets)[j].delta_R(std::get<1>(recjets)[i]);
-      // std::cout << deltaRTrueRec << std::endl;
-      Int_t et = 0;
-      while ( ( std::get<1>(truejets)[j].eta() > partEta[et+1] ) && ( et < nEta )) et++;
-      
-      if(deltaRTrueRec<0.25){
-        // Spectra
-        h3D_truth_reco_phi[select]->Fill(std::get<1>(truejets)[j].phi(), std::get<1>(recjets)[i].phi(), eta);
-        h3D_truth_reco_eta[select]->Fill(std::get<1>(truejets)[j].eta(), std::get<1>(recjets)[i].eta(), eta);
-        h3D_truth_reco_E[select]->Fill(std::get<1>(truejets)[j].E(), std::get<1>(recjets)[i].E(), eta);
-        h3D_truth_reco_pT[select]->Fill(std::get<1>(truejets)[j].pt(), std::get<1>(recjets)[i].pt(), eta);
-        h3D_truth_reco_p[select]->Fill(std::get<1>(truejets)[j].modp(), std::get<1>(recjets)[i].modp(), eta);
-
-        h2D_jet_EtaReso_Eta[select]->Fill(std::get<1>(truejets)[j].eta(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
-
-        if(verbosityJRH>1) std::cout << "rec jet " << i << " (" << std::get<1>(recjets)[i].E() << "E)  matched with true jet " << j << " (" << std::get<1>(truejets)[j].E() << "E) with dR = " << deltaRTrueRec << std::endl;
-        h_jetscale_E[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[j].E())/std::get<1>(truejets)[j].E());
-        h_jetscale_pT[select][et]->Fill(std::get<1>(truejets)[j].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[j].pt())/std::get<1>(truejets)[j].pt());
-        h_jetscale_p[select][et]->Fill(std::get<1>(truejets)[j].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[j].modp())/std::get<1>(truejets)[j].modp());
-        h_jetscale_eta[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
-        h_jetscale_phi[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(truejets)[j].delta_phi_to(std::get<1>(recjets)[i])));
-
-        h2D_jet_EtaReso_E[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta())/std::get<1>(truejets)[j].eta());
-        h2D_jet_PhiReso_E[select][et]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(truejets)[j].delta_phi_to(std::get<1>(recjets)[i]))/std::get<1>(truejets)[j].phi());
-
-        if(std::get<1>(truejets)[j].eta()>1.5){
-          h_jetscale_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[j].E())/std::get<1>(truejets)[j].E());
-          h_jetscale_pT[select][nEta]->Fill(std::get<1>(truejets)[j].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[j].pt())/std::get<1>(truejets)[j].pt());
-          h_jetscale_p[select][nEta]->Fill(std::get<1>(truejets)[j].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[j].modp())/std::get<1>(truejets)[j].modp());
-
-          h2D_jet_EtaReso_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[j].eta()));
-          h2D_jet_PhiReso_E[select][nEta]->Fill(std::get<1>(truejets)[j].E(),(std::get<1>(truejets)[j].delta_phi_to(std::get<1>(recjets)[i])));
-        }
-        h_MCjet_E_eta[select]->Fill(std::get<1>(truejets)[j].E(),std::get<1>(truejets)[j].eta());
-        h_jet_E_eta[select]->Fill(std::get<1>(recjets)[i].E(),std::get<1>(recjets)[i].eta());
+      if (deltaRTrueRec < closest_dr) {
+        closest_dr = deltaRTrueRec;
+        potential_matches++;
+        closest_index = j;
       }
+      // std::cout << deltaRTrueRec << std::endl;
+      
+    }
+    if (closest_index != -1) { // populate for closest jet
+      // if (potential_matches - 1) {
+      //   std::cout << potential_matches << " potential matches found" << std::endl;
+      // }
+      Int_t et = 0;
+      while ( ( std::get<1>(truejets)[closest_index].eta() > partEta[et+1] ) && ( et < nEta )) et++;
+    
+      // Spectra
+      h3D_truth_reco_phi[select]->Fill(std::get<1>(truejets)[closest_index].phi(), std::get<1>(recjets)[i].phi(), eta);
+      h3D_truth_reco_eta[select]->Fill(std::get<1>(truejets)[closest_index].eta(), std::get<1>(recjets)[i].eta(), eta);
+      h3D_truth_reco_E[select]->Fill(std::get<1>(truejets)[closest_index].E(), std::get<1>(recjets)[i].E(), eta);
+      h3D_truth_reco_pT[select]->Fill(std::get<1>(truejets)[closest_index].pt(), std::get<1>(recjets)[i].pt(), eta);
+      h3D_truth_reco_p[select]->Fill(std::get<1>(truejets)[closest_index].modp(), std::get<1>(recjets)[i].modp(), eta);
+
+      h2D_jet_EtaReso_Eta[select]->Fill(std::get<1>(truejets)[closest_index].eta(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[closest_index].eta()));
+
+      if(verbosityJRH>1) std::cout << "rec jet " << i << " (" << std::get<1>(recjets)[i].E() << "E)  matched with true jet " << closest_index << " (" << std::get<1>(truejets)[closest_index].E() << "E) with dR = " << closest_dr << std::endl;
+      h_jetscale_E[select][et]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[closest_index].E())/std::get<1>(truejets)[closest_index].E());
+      h_jetscale_pT[select][et]->Fill(std::get<1>(truejets)[closest_index].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[closest_index].pt())/std::get<1>(truejets)[closest_index].pt());
+      h_jetscale_p[select][et]->Fill(std::get<1>(truejets)[closest_index].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[closest_index].modp())/std::get<1>(truejets)[closest_index].modp());
+      h_jetscale_eta[select][et]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[closest_index].eta()));
+      h_jetscale_phi[select][et]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(truejets)[closest_index].delta_phi_to(std::get<1>(recjets)[i])));
+
+      h2D_jet_EtaReso_E[select][et]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[closest_index].eta())/std::get<1>(truejets)[closest_index].eta());
+      h2D_jet_PhiReso_E[select][et]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(truejets)[closest_index].delta_phi_to(std::get<1>(recjets)[i]))/std::get<1>(truejets)[closest_index].phi());
+
+      if(std::get<1>(truejets)[closest_index].eta()>1.5){
+        h_jetscale_E[select][nEta]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(recjets)[i].E()-std::get<1>(truejets)[closest_index].E())/std::get<1>(truejets)[closest_index].E());
+        h_jetscale_pT[select][nEta]->Fill(std::get<1>(truejets)[closest_index].pt(),(std::get<1>(recjets)[i].pt()-std::get<1>(truejets)[closest_index].pt())/std::get<1>(truejets)[closest_index].pt());
+        h_jetscale_p[select][nEta]->Fill(std::get<1>(truejets)[closest_index].modp(),(std::get<1>(recjets)[i].modp()-std::get<1>(truejets)[closest_index].modp())/std::get<1>(truejets)[closest_index].modp());
+
+        h2D_jet_EtaReso_E[select][nEta]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(recjets)[i].eta()-std::get<1>(truejets)[closest_index].eta()));
+        h2D_jet_PhiReso_E[select][nEta]->Fill(std::get<1>(truejets)[closest_index].E(),(std::get<1>(truejets)[closest_index].delta_phi_to(std::get<1>(recjets)[i])));
+      }
+      h_MCjet_E_eta[select]->Fill(std::get<1>(truejets)[closest_index].E(),std::get<1>(truejets)[closest_index].eta());
+      h_jet_E_eta[select]->Fill(std::get<1>(recjets)[i].E(),std::get<1>(recjets)[i].eta());
     }
   } // jet loop end
 
