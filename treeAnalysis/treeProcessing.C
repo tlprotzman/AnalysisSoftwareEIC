@@ -338,6 +338,7 @@ void treeProcessing(
           // for(Int_t iclus=0; iclus<_nclusters_FEMC; iclus++){
           //     if(verbosity>1) std::cout << "\tFEMC:  cluster " << iclus << "\twith E = " << (_clusters_calo[kV1][kFEMC].at(iclus)).cluster_E << " GeV" << std::endl;
           // }
+          std::cout << "\n\n\nADDING CALO JET COMPONENTS:" << std::endl;
           if (caloEnabled[kFEMC]){
             fillECalClustersIntoJetFindingInputs(
                 kFEMC, kMA,
@@ -346,6 +347,7 @@ void treeProcessing(
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz,
                 jetf_full_E, jetf_full_px, jetf_full_py, jetf_full_pz
             );
+            std::cout << "After filling FEMC, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // EEMC
           if (caloEnabled[kEEMC]){
@@ -356,6 +358,7 @@ void treeProcessing(
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz,
                 jetf_full_E, jetf_full_px, jetf_full_py, jetf_full_pz
             );
+            std::cout << "After filling EEEMC, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // EEMCG
           if (caloEnabled[kEEMCG]){
@@ -366,6 +369,7 @@ void treeProcessing(
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz,
                 jetf_full_E, jetf_full_px, jetf_full_py, jetf_full_pz
             );
+            std::cout << "After filling EEMCG?, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // CEMC
           if (caloEnabled[kCEMC]){
@@ -376,6 +380,7 @@ void treeProcessing(
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz,
                 jetf_full_E, jetf_full_px, jetf_full_py, jetf_full_pz
             );
+            std::cout << "After filling CEMC, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // BECAL
           if (caloEnabled[kBECAL]){
@@ -386,6 +391,7 @@ void treeProcessing(
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz,
                 jetf_full_E, jetf_full_px, jetf_full_py, jetf_full_pz
             );
+            std::cout << "After filling BECAL, " << jetf_calo_E.size() << " components added" << std::endl;
           }
 
           // Forward HCal
@@ -396,6 +402,7 @@ void treeProcessing(
                 jetf_calo_E, jetf_calo_px, jetf_calo_py, jetf_calo_pz,
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz
             );
+            std::cout << "After filling forward Hcalo, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // EHCAL
           if (caloEnabled[kEHCAL]){
@@ -405,6 +412,7 @@ void treeProcessing(
                 jetf_calo_E, jetf_calo_px, jetf_calo_py, jetf_calo_pz,
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz
             );
+            std::cout << "After filling EHCAL, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // HCALIN
           if (caloEnabled[kHCALIN]){
@@ -414,6 +422,7 @@ void treeProcessing(
                 jetf_calo_E, jetf_calo_px, jetf_calo_py, jetf_calo_pz,
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz
             );
+            std::cout << "After filling HCALIN, " << jetf_calo_E.size() << " components added" << std::endl;
           }
           // HCALOUT
           if (caloEnabled[kHCALOUT]){
@@ -423,7 +432,9 @@ void treeProcessing(
                 jetf_calo_E, jetf_calo_px, jetf_calo_py, jetf_calo_pz,
                 jetf_all_E, jetf_all_px, jetf_all_py, jetf_all_pz
             );
+            std::cout << "After filling HCALOUT, " << jetf_calo_E.size() << " components added" << std::endl;
           }
+          std::cout << "\n\n\n";
         }
 
         // ANCHOR MC particle loop variables:
